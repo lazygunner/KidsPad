@@ -149,7 +149,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             <TouchableOpacity onPress={() => navigation.push('Web')}>
               <Text>
                 已阅读并同意
-                <Text style={styles.linkText}>用户协议</Text>
+                <Text style={styles.linkText}>《用户协议》</Text>
               </Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={handleLogin}>
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     marginTop: rm(26),
   },
   linkText: {
-    color: color_black,
+    color: '#D5B26C',
   },
 });
 

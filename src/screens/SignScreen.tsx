@@ -1,10 +1,13 @@
 import React from 'react';
 import {
+  AppState,
+  AppStateStatus,
   DeviceEventEmitter,
   EmitterSubscription,
   FlatList,
   Image,
   ImageBackground,
+  NativeEventSubscription,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -89,6 +92,8 @@ export default class SignScreen extends React.Component<SignScreenProps, SignScr
 
   private loginListener?: EmitterSubscription;
 
+  private appStateListener?: NativeEventSubscription;
+
   private signModalRef = React.createRef<SignModal>();
 
   private msgModalRef = React.createRef<MsgModal>();
@@ -104,29 +109,52 @@ export default class SignScreen extends React.Component<SignScreenProps, SignScr
       this.toLogin(false);
       return;
     }
+    this.appStateListener = AppState.addEventListener('change', this.handleAppStateChange);
     this.loginListener = DeviceEventEmitter.addListener('toLogin', this.handleForceLogout);
     await this.getGardenInfo();
     this.autoSelectClass();
     await this.getClassInfo();
-    this.intervalGarden = setInterval(() => this.getGardenInfo(), 10000);
-    this.intervalClass = setInterval(() => this.getClassInfo(), 5000);
+    this.startAutoRefresh();
   }
 
   componentWillUnmount(): void {
     this.clearIntervalAll();
     this.loginListener?.remove();
+    this.appStateListener?.remove();
   }
 
   private handleForceLogout = () => {
+    this.clearIntervalAll();
     this.toLogin(false);
+  };
+
+  private handleAppStateChange = (nextAppState: AppStateStatus) => {
+    if (nextAppState === 'active') {
+      this.startAutoRefresh();
+      this.getGardenInfo();
+      this.getClassInfo();
+      return;
+    }
+    this.clearIntervalAll();
   };
 
   private clearIntervalAll(): void {
     if (this.intervalGarden) {
       clearInterval(this.intervalGarden);
+      this.intervalGarden = undefined;
     }
     if (this.intervalClass) {
       clearInterval(this.intervalClass);
+      this.intervalClass = undefined;
+    }
+  }
+
+  private startAutoRefresh(): void {
+    if (!this.intervalGarden) {
+      this.intervalGarden = setInterval(() => this.getGardenInfo(), 10000);
+    }
+    if (!this.intervalClass) {
+      this.intervalClass = setInterval(() => this.getClassInfo(), 5000);
     }
   }
 

@@ -69,8 +69,12 @@ export class PinModal extends React.Component<PinModalProps, PinModalState> {
     if (!confirm) {
       return;
     }
+    // Verification and other flows submit via Password.onEnd once max length is reached.
+  };
+
+  private handleComplete = (): void => {
     if (this.type === PIN_TYPE.VERIFY) {
-      this.verifyPin();
+      this.commit();
     }
   };
 
@@ -219,7 +223,7 @@ export class PinModal extends React.Component<PinModalProps, PinModalState> {
                     ref={this.passwordRef}
                     maxLength={6}
                     onChange={this.updateConfirm}
-                    onEnd={() => this.commit()}
+                    onEnd={this.handleComplete}
                   />
                   {this.type !== PIN_TYPE.VERIFY && (
                     <View style={BtnStyle.bottom_btn}>
