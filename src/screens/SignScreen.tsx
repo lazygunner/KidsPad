@@ -255,13 +255,39 @@ export default class SignScreen extends React.Component<SignScreenProps, SignScr
     this.pinModalRef.current?.show(payload, PIN_TYPE.VERIFY);
   }
 
+  private requestPinSetup(item: StudentItem): void {
+    if (item.resetTag) {
+      this.msgModalRef.current?.show({
+        showType: 2,
+        studentId: item.studentId,
+        content: '您的PIN码已清除重置，请重新设置PIN码。',
+        contentEn: 'Your PIN is cleared. Enter a new PIN to identify yourself.',
+      });
+      return;
+    }
+    this.msgModalRef.current?.show({
+      showType: 2,
+      studentId: item.studentId,
+      content: '首次签到，请设置PIN码。',
+      contentEn: 'Please create your login PIN number.',
+    });
+  }
+
+  private proceedPinFlow(item: StudentItem, type: number): void {
+    if (item.setPIN) {
+      this.verifyPin(item, type);
+      return;
+    }
+    this.requestPinSetup(item);
+  }
+
   private msgCommit(item: MsgModalPayload): void {
     switch (item.showType) {
       case 1:
         break;
       case 4:
         if (item.item) {
-          this.verifyPin(item.item as StudentItem, item.signType ?? 0);
+          this.proceedPinFlow(item.item as StudentItem, item.signType ?? 0);
         }
         break;
       case 2:
@@ -328,25 +354,7 @@ export default class SignScreen extends React.Component<SignScreenProps, SignScr
       });
       return;
     }
-    if (item.setPIN) {
-      this.verifyPin(item, type);
-    } else {
-      if (item.resetTag) {
-        this.msgModalRef.current?.show({
-          showType: 2,
-          studentId: item.studentId,
-          content: '您的PIN码已清除重置，请重新设置PIN码。',
-          contentEn: 'Your PIN is cleared. Enter a new PIN to identify yourself.',
-        });
-      } else {
-        this.msgModalRef.current?.show({
-          showType: 2,
-          studentId: item.studentId,
-          content: '首次签到，请设置PIN码。',
-          contentEn: 'Please create your login PIN number.',
-        });
-      }
-    }
+    this.proceedPinFlow(item, type);
   }
 
   private renderModal(): React.ReactNode {
