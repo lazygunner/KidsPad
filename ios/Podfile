@@ -30,5 +30,14 @@ target 'KidsPad' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    installer.pods_project.targets.each do |target|
+      next unless target.name == 'react-native-config'
+
+      target.build_configurations.each do |build_configuration|
+        envfile_path = build_configuration.name == 'Release' ? 'config/.env.prod' : 'config/.env.dev'
+        build_configuration.build_settings['ENVFILE'] = envfile_path
+      end
+    end
   end
 end

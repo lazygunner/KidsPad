@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Image,
   KeyboardAvoidingView,
@@ -47,6 +47,18 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [securePwdText, setSecurePwdText] = useState(true);
   const passwordInputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    StorageUtils.retrieveData<string>('token').then(token => {
+      if (isMounted && token) {
+        navigation.replace('Sign');
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [navigation]);
 
   const setTags = async (gardenId?: string, classId?: string) => {
     const tags: string[] = [];
